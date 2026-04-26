@@ -24,7 +24,7 @@
 - (void) setNeedsDisplayInRect:(NSRect)invalidRect
 {
     // Always draw entire bounds, else we get artifacts
-    [super setNeedsDisplayInRect:[self bounds]];
+    [super setNeedsDisplayInRect:CGRectUnion(invalidRect, [self bounds])];
 }
 
 
