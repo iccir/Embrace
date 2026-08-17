@@ -36,6 +36,7 @@ static NSDictionary *sGetDefaultValues()
         @"showsGenre":           @NO,
         @"showsDuplicateStatus": @YES,
         @"showsPlayingStatus":   @YES,
+        @"showsStatusShape":     @NO,
         @"showsLabelDots":       @NO,
         @"showsLabelStripes":    @YES,
         @"showsYear":            @NO,
@@ -232,6 +233,9 @@ static void sRegisterDefaults()
 
     } else if (attribute == TrackViewAttributePlayingStatus) {
         return @"showsPlayingStatus";
+
+    } else if (attribute == TrackViewAttributeStatusShape) {
+        return @"showsStatusShape";
 
     } else if (attribute == TrackViewAttributeLabelDots) {
         return @"showsLabelDots";

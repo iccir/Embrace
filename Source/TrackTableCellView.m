@@ -40,6 +40,7 @@
 
 @property (nonatomic, strong)          TrackLabelView *dotLabelView;
 @property (nonatomic, weak)   IBOutlet TrackLabelView *edgeLabelView;
+@property (nonatomic, strong)          TrackLabelView *statusShapeLabelView;
 
 @end
 
@@ -289,6 +290,7 @@
     if (object == _observedObject) {
     
         if ([keyPath isEqualToString:@"trackStatus"]) {
+            [self _updateStatusShape];
             [self updateColors];
             
             [NSAnimationContext runAnimationGroup:^(NSAnimationContext *ac) {
@@ -413,6 +415,19 @@
 }
 
 
+- (CGFloat) _statusShapeLength
+{
+    NSInteger numberOfLayoutLines = [[Preferences sharedInstance] numberOfLayoutLines];
+    BOOL      usesLargerText      = [[Preferences sharedInstance] usesLargerText];
+    
+    if (numberOfLayoutLines == 1) {
+        return usesLargerText ? 24 : 20;
+    } else {
+        return usesLargerText ? 28 : 25;
+    }
+}
+
+
 #pragma mark - Update
 
 - (void) _updateView
@@ -425,6 +440,7 @@
     [self updateColors];
 
     if ([self track]) {
+        [self _updateStatusShape];
         [self _updateRightIcons];
         [self _updateFieldStrings];
         [self _updateFieldHidden];
@@ -458,6 +474,10 @@
     CGFloat constant = isPlaying ? 8.0 : -13.0;
     CGFloat alpha    = isPlaying ? 1.0 :  0.0;
 
+    if ([[Preferences sharedInstance] showsStatusShape]) {
+        constant += 8 + [self _statusShapeLength];
+    }
+
     if (animated) {
         [[_speakerLeftConstraint animator] setConstant:constant];
         [[_speakerImageView animator] setAlphaValue:alpha];
@@ -467,6 +487,40 @@
     }
 }
 
+- (void) _updateStatusShape
+{
+    BOOL showsStatusShape   = [[Preferences sharedInstance] showsStatusShape];
+
+    if (showsStatusShape && !_statusShapeLabelView) {
+        _statusShapeLabelView = [[TrackLabelView alloc] initWithFrame:CGRectMake(0, 0, 20, 20)];
+        [_statusShapeLabelView setStyle:TrackLabelViewStatusShape];
+        [_statusShapeLabelView setTranslatesAutoresizingMaskIntoConstraints:NO];
+
+        [[_durationField superview] addSubview:_statusShapeLabelView positioned:NSWindowAbove relativeTo:nil];
+
+    } else if (!showsStatusShape && _statusShapeLabelView) {
+        [_statusShapeLabelView removeFromSuperview];
+        _statusShapeLabelView = nil;
+    }
+    
+
+    CGRect bounds = [self bounds];
+
+    CGFloat length = [self _statusShapeLength];
+    
+    
+    CGRect frame = CGRectMake(
+        8,
+        round((bounds.size.height - length) / 2.0),
+        length,
+        length
+    );
+
+    [_statusShapeLabelView setFrame:frame];
+    
+    [_statusShapeLabelView setTrackStatus:[[self track] trackStatus]];
+    [_statusShapeLabelView setLabel:[[self track] trackLabel]];
+}
 
 - (void) _updateRightIcons
 {
@@ -615,12 +669,14 @@
         [_errorButton setPressedColor:primaryColor];
 
         [_dotLabelView setNeedsWhiteBorder:YES];
+        [_statusShapeLabelView setNeedsWhiteBorder:YES];
 
     } else {
         [_errorButton setNormalColor: [NSColor colorNamed:@"ButtonAlert"]];
         [_errorButton setPressedColor:[NSColor colorNamed:@"ButtonAlertPressed"]];
 
         [_dotLabelView setNeedsWhiteBorder:NO];
+        [_statusShapeLabelView setNeedsWhiteBorder:NO];
     }
   
     

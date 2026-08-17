@@ -7,12 +7,14 @@
 
 typedef NS_ENUM(NSInteger, TrackLabelViewStyle) {
     TrackLabelViewEdge,
-    TrackLabelViewDot
+    TrackLabelViewDot,
+    TrackLabelViewStatusShape
 };
 
 @interface TrackLabelView : NSView
 
 @property (nonatomic) TrackLabelViewStyle style;
+@property (nonatomic) TrackStatus trackStatus;
 @property (nonatomic) TrackLabel label;
 @property (nonatomic) BOOL needsWhiteBorder;
 
